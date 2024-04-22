@@ -1,0 +1,75 @@
+﻿@page "/searchusertablecomponent"
+
+@inject IUserService userServices
+
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-5">
+
+    <MudText Typo="Typo.h5" GutterBottom="true"><b>Users</b></MudText>
+    <MudGrid>
+       
+
+        <MudItem xs="12">
+
+            <MudTable Items="@users" Class="gridBorder" CustomHeader="true" HeaderClass="table-head-bordered"
+                      Dense="true"
+                      Striped="true" Bordered="true"
+                      Filter="new Func<User,bool>(ToFilterFunc)" @bind-SelectedItem="selectedItem"
+                      Loading="@_loading" LoadingProgressColor="Color.Info">
+                <ToolBarContent>
+                    <MudSpacer />
+                    <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                </ToolBarContent>
+                <HeaderContent>
+                    <MudTHeadRow Class="header-centered">
+                        <MudTh>Name</MudTh>
+                        <MudTh>UserName</MudTh>
+                        <MudTh>Email</MudTh>
+                        <MudTh>City</MudTh>
+                    </MudTHeadRow>
+                </HeaderContent>
+                <RowTemplate Context="userRow">
+                    <MudTd DataLabel="Name">@userRow.Name</MudTd>
+                        <MudTd DataLabel="UserName">@userRow.UserName</MudTd>
+                        <MudTd DataLabel="Email">@userRow.Email</MudTd>
+                        <MudTd DataLabel="City">@userRow.Address.City</MudTd>
+                    </RowTemplate>
+                    <PagerContent>
+                        <MudTablePager RowsPerPageString="Rows per page" PageSizeOptions=@(new int[] {5, 10, 20}) />
+                    </PagerContent>
+                </MudTable>
+            </MudItem>
+        </MudGrid>
+    </MudContainer>
+
+
+@code {
+    IEnumerable<User> users;
+    private string searchString = "";
+    private User selectedItem = null;
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await userServices.GetAll();
+        _loading = false;
+    }
+
+    private bool ToFilterFunc(User element) => FilterFunc(element, searchString);
+
+    private bool FilterFunc(User element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Email.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Address.City.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if ($"{element.Name} {element.Email} {element.Address.City}".Contains(searchString))
+            return true;
+
+        return false;
+    }
+}

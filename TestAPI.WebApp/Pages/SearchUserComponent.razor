@@ -1,0 +1,44 @@
+﻿@page "/"
+
+@inject IUserService userServices
+
+@if (@users != null)
+{
+    <MudSlider @bind-Value="spacing" Min="0" Max="10" Color="Color.Info" Class="mb-4">Spacing: @spacing.ToString()</MudSlider>
+    
+    <MudGrid Spacing="@spacing" Justify="Justify.Center">
+        @foreach (var item in users)
+        {
+            <MudItem>
+                <MudCard>
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                             <MudText Typo="Typo.h5">@item.Name</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudText Typo="Typo.h6">UserName</MudText>
+                            <MudText>@item.UserName</MudText>
+                            <MudText Typo="Typo.h6">Email</MudText>
+                            <MudText Typo="Typo.body2">@item.Email</MudText>
+                            <MudText Typo="Typo.h6">City</MudText>
+                            <MudText Typo="Typo.body2">@item.Address.City</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+        }
+    </MudGrid>
+
+}
+
+@code {
+    public int spacing { get; set; } = 2;
+    IEnumerable<User> users;
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await userServices.GetAll();
+        _loading = false;
+    }
+}
